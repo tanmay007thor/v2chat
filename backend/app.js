@@ -24,7 +24,7 @@ const io = socket(server , {
 })
 // app.get('/api/messages' , () =>{console.log('hey there')})
 app.use(express.json());
-app.use(express.urlencoded({extended: false}))
+app.use(express.urlencoded({extended: true}))
 
 app.use('/api/auth' , authRoutes)
 app.use('/api/messages' , messageRoutes)
