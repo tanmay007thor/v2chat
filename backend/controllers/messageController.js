@@ -1,15 +1,41 @@
-const message = require('../model/messageModal')
-const getMessages = async (req , res , next) =>{
-    console.log('its working')
-    res.status(200).json({ message: "hey there getmessage req" });
+const Messages = require("../model/messageModal");
 
-}
+const getMessages = async (req, res, next) => {
+  try {
+    const { from, to } = req.body;
 
-const addMessages = async(req , res ,next) =>{
-    console.log('its working')
-    res.status(200).json({ message: "hey there add message req" });
+    const messages = await Messages.find({
+      users: {
+        $all: [from, to],
+      },
+    }).sort({ updatedAt: 1 });
 
+    const projectedMessages = messages.map((msg) => {
+      return {
+        fromSelf: msg.sender.toString() === from,
+        message: msg.message.text,
+      };
+    });
+    res.json(projectedMessages);
+  } catch (ex) {
+    next(ex);
+  }
+};
 
-}
+const addMessages = async (req, res, next) => {
+  try {
+    const { from, to, message } = req.body;
+    const data = await Messages.create({
+      message: { text: message },
+      users: [from, to],
+      sender: from,
+    });
+
+    if (data) return res.json({ msg: "Message added successfully." });
+    else return res.json({ msg: "Failed to add message to the database" });
+  } catch (ex) {
+    next(ex);
+  }
+};
 
 module.exports = {getMessages , addMessages}

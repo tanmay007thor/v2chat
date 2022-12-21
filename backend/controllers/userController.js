@@ -78,21 +78,24 @@ const setAvatar = async (req, res) => {
       { new: true }
     );
 
-    res
-      .status(200)
-      .json({
-        message: "succesfully updated ",
-        status: true,
-        isSet: userData.isAvatarImageSet,
-        image: userData.avatarImage,
-      });
+    res.status(200).json({
+      message: "succesfully updated ",
+      status: true,
+      isSet: userData.isAvatarImageSet,
+      image: userData.avatarImage,
+    });
   } catch (e) {
     res.status(500).json({ message: "server error", status: false });
   }
 };
 const logout = (req, res) => {
-  res.status(200).json({ message: "hey there logout  req" });
   try {
+    const id = req.params.id;
+    if (!id) {
+      res.status(402).json({ message: "not found id", status: false });
+    }
+    onlineUsers.delete({ id });
+    res.status(200).json({message : "Lougout User" , status : true });
   } catch (e) {
     res.status(500).json({ message: "server error", status: false });
   }
