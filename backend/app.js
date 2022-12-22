@@ -4,6 +4,7 @@ const cors = require("cors");
 const authRoutes = require('./routes/auth')
 const messageRoutes = require('./routes/messages')
 const socket = require("socket.io");
+const auth = require('./middleware/authentication')
 app.use(cors());
 
 require('./db/config')
@@ -27,7 +28,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}))
 
 app.use('/api/auth' , authRoutes)
-app.use('/api/messages' , messageRoutes)
+app.use('/api/messages' ,auth ,  messageRoutes)
 
 global.onlineUsers = new Map();
 io.on("connection", (socket) => {

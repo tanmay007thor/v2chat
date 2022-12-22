@@ -1,21 +1,29 @@
 const bcrypt = require("bcryptjs");
-const { create } = require("../model/userModal");
+const jwt = require("jsonwebtoken");
 const User = require("../model/userModal");
 const login = async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (!user) {
-      res.status(400).json({ message: "email is not found !", status: false });
+      res.status(400).json({ message: "user is not found !", status: false });
     }
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       res.status(401).json({ message: "user is unauthoized !", status: false });
     }
     const isUser = await User.findOne({ username: username });
+    const token = jwt.sign(
+      {
+        name: user.username,
+        id: user._id,
+      },
+      process.env.TOKEN_SECRET,
+      { expiresIn: process.env.JWT_LIFETIME }
+    );
     return res
       .status(200)
-      .json({ message: "user found", status: true, isUser });
+      .json({ message: "user found succesfully !", status: true, isUser ,token : token });
   } catch (e) {
     console.log(e);
   }
@@ -24,6 +32,7 @@ const register = async (req, res) => {
   try {
     const { username, email, password } = await req.body;
     console.log(username, email);
+
     const checkUserName = await User.findOne({ username });
     if (checkUserName) {
       res
@@ -35,17 +44,28 @@ const register = async (req, res) => {
       res.status(400).json({ message: "email already taken ", status: false });
     }
     const hashPassword = await bcrypt.hash(password, 10);
+
     const user = await User.create({
       username,
       email,
       password: hashPassword,
     });
+    const token = jwt.sign(
+      {
+        name: user.username,
+        id: user._id,
+      },
+      process.env.TOKEN_SECRET,
+      { expiresIn: process.env.JWT_LIFETIME }
+    );
     res.status(201).json({
       message: "User Created Succesfully !",
       status: true,
       user,
+      token: token,
     });
   } catch (e) {
+    console.log(e);
     res.status(500).json({ message: "Server Error !", status: false });
   }
 };
@@ -95,7 +115,7 @@ const logout = (req, res) => {
       res.status(402).json({ message: "not found id", status: false });
     }
     onlineUsers.delete({ id });
-    res.status(200).json({message : "Lougout User" , status : true });
+    res.status(200).json({ message: "Lougout User", status: true });
   } catch (e) {
     res.status(500).json({ message: "server error", status: false });
   }
