@@ -4,16 +4,17 @@ const User = require("../model/userModal");
 const login = async (req, res) => {
   const { username, password } = req.body;
   const user = await User.findOne({ username });
-  const isValidPassword = await bcrypt.compare(password, user.password);
+  const isUser = await User.findOne({ username: username });
 
   try {
     if (!user) {
     return   res.status(400).json({ message: "user is not found !", status: false });
     }
+    const isValidPassword = await bcrypt.compare(password, user.password);
+
     if (!isValidPassword) {
      return  res.status(401).json({ message: "user is unauthoized !", status: false });
     }
-    const isUser = await User.findOne({ username: username });
     const token = jwt.sign(
       {
         name: user.username,
