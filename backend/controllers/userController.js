@@ -2,15 +2,16 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../model/userModal");
 const login = async (req, res) => {
+  const { username, password } = req.body;
+  const user = await User.findOne({ username });
+  const isValidPassword = await bcrypt.compare(password, user.password);
+
   try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
     if (!user) {
-      res.status(400).json({ message: "user is not found !", status: false });
+    return   res.status(400).json({ message: "user is not found !", status: false });
     }
-    const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      res.status(401).json({ message: "user is unauthoized !", status: false });
+     return  res.status(401).json({ message: "user is unauthoized !", status: false });
     }
     const isUser = await User.findOne({ username: username });
     const token = jwt.sign(
@@ -29,21 +30,21 @@ const login = async (req, res) => {
   }
 };
 const register = async (req, res) => {
-  try {
-    const { username, email, password } = await req.body;
-    console.log(username, email);
+  const { username, email, password } = await req.body;
+  const checkUserName = await User.findOne({ username });
+  const checkEmail = await User.findOne({ email });
+  const hashPassword = await bcrypt.hash(password, 10);
 
-    const checkUserName = await User.findOne({ username });
+  try {
+
     if (checkUserName) {
-      res
+      return res
         .status(400)
         .json({ message: "username already taken ", status: false });
     }
-    const checkEmail = await User.findOne({ email });
-    if (checkEmail) {
-      res.status(400).json({ message: "email already taken ", status: false });
+    else if (checkEmail) {
+      return res.status(400).json({ message: "email already taken ", status: false });
     }
-    const hashPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       username,
