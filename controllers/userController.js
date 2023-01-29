@@ -89,8 +89,9 @@ const getAllUser = async (req, res) => {
 };
 const setAvatar = async (req, res) => {
   try {
-    const userId = req.params.id;
-    const avatarImage = req.body.image;
+    const userId = await req.params.id;
+    const avatarImage = 'jpeg';
+
     const userData = await User.findByIdAndUpdate(
       userId,
       {
@@ -99,7 +100,7 @@ const setAvatar = async (req, res) => {
       },
       { new: true }
     );
-
+      console.log(req.files)
     res.status(200).json({
       message: "succesfully updated ",
       status: true,

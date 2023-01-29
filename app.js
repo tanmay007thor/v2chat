@@ -11,7 +11,8 @@ require('./db/config')
 app.get('/', (req, res) => {
   res.send('<h1>Hello </h1>');
 });
-
+var fileupload = require("express-fileupload");
+app.use(fileupload());
 
 const server = app.listen(process.env.PORT, () =>
   console.log(`Server started on ${process.env.PORT}`)
